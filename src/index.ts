@@ -2,7 +2,8 @@ import "dotenv/config";
 import fastifyCors from "@fastify/cors";
 
 import fastifySwagger from "@fastify/swagger";
-import fastifySwaggerUi from "@fastify/swagger-ui";
+// 🌟 Novo import do Scalar API Reference
+import fastifyApiReference from "@scalar/fastify-api-reference";
 import Fastify from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import {
@@ -12,7 +13,7 @@ import {
 } from "fastify-type-provider-zod";
 import { z } from "zod";
 
-// 🌟 Importa a configuração do Better Auth que criamos no arquivo anterior
+// Importa a configuração do Better Auth que criamos no arquivo anterior
 import { auth } from "./lib/auth.js"; 
 
 const app = Fastify({
@@ -25,10 +26,10 @@ app.setSerializerCompiler(serializerCompiler);
 // Configuração do CORS para comunicação com o Frontend
 await app.register(fastifyCors, {
   origin: ["http://localhost:3000"],
-  credentials: true, // Essencial para os cookies do Better Auth
+  credentials: true,
 });
 
-// Configuração da documentação Swagger
+// Configuração da documentação básica do Swagger (Obrigatório para o Scalar ler os dados)
 await app.register(fastifySwagger, {
   openapi: {
     info: {
@@ -46,11 +47,27 @@ await app.register(fastifySwagger, {
   transform: jsonSchemaTransform,
 });
 
-await app.register(fastifySwaggerUi, {
+// Substitua todo o bloco do fastifyApiReference por este formato direto:
+// 🌟 Atualizado exatamente igual à sua vídeo aula e protegido contra erros de tipo com 'as any'
+await app.register(fastifyApiReference as any, {
   routePrefix: "/docs",
+  configuration: {
+    sources: [
+      {
+        title: "Bootcamp Treinos API",
+        slug: "bootcamp-treinos-api",
+        url: "/swagger.json",
+      },
+      {
+        title: "Auth API",
+        slug: "auth-api",
+        url: "/api/auth/open-api/generate-schema",
+      },
+    ],
+  },
 });
 
-// Rota Inicial de Teste (Hello World)
+// 🌟 Rota Inicial de Teste (Hello World) - Mantida aqui!
 app.withTypeProvider<ZodTypeProvider>().route({
   method: "GET",
   url: "/",
@@ -70,18 +87,28 @@ app.withTypeProvider<ZodTypeProvider>().route({
   },
 });
 
-// 🌟 Rota de Autenticação universal sem dependências de pacotes quebrados
+// 🌟 Rota adicionada da vídeo aula (Expõe o JSON pro Scalar) - Separada corretamente!
+app.withTypeProvider<ZodTypeProvider>().route({
+  method: "GET",
+  url: "/swagger.json",
+  schema: {
+    hide: true,
+  },
+  handler: async () => {
+    return app.swagger();
+  },
+});
+
+// Rota de Autenticação universal sem dependências de pacotes quebrados
 app.route({
   method: ["GET", "POST", "PUT", "DELETE"], 
   url: "/api/auth/*",
   async handler(request, reply) {
     try {
-      // 1. Monta a URL completa baseada nos headers da requisição
       const protocol = request.headers["x-forwarded-proto"] || "http";
       const host = request.headers.host || "localhost:3000";
       const fullUrl = `${protocol}://${host}${request.raw.url}`;
 
-      // 2. Transforma os cabeçalhos do Fastify no objeto standard Headers da Web API
       const webHeaders = new Headers();
       Object.entries(request.headers).forEach(([key, value]) => {
         if (value) {
@@ -93,14 +120,12 @@ app.route({
         }
       });
 
-      // 3. Constrói o Web Request que o handler do Better Auth exige nativamente no Node v24
       const webRequest = new Request(fullUrl, {
         method: request.method,
         headers: webHeaders,
         body: request.body && request.method !== "GET" ? JSON.stringify(request.body) : undefined,
       });
 
-      // 4. Executa e devolve a resposta tratada
       const response = await auth.handler(webRequest);
       return reply.send(response);
       
