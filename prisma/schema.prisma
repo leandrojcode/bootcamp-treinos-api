@@ -1,32 +1,106 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id           String        @id @default(uuid())
-  workoutPlans WorkoutPlan[]
+  id            String        @id
+  name          String
+  email         String        @unique
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+  workoutPlans  WorkoutPlan[]
+  accounts      Account[]
+  sessions      Session[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
 }
 
 model WorkoutPlan {
   id          String       @id @default(uuid())
   name        String
   userId      String
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workoutDays WorkoutDay[]
   isActive    Boolean      @default(true)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
+  workoutDays WorkoutDay[]
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WorkoutDay {
+  id            String            @id @default(uuid())
+  name          String
+  workoutPlanId String
+  isRest        Boolean           @default(false)
+  weekDay       WeekDay
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  workoutPlan   WorkoutPlan       @relation(fields: [workoutPlanId], references: [id])
+  exercises     WorkoutExercise[]
+}
+
+model WorkoutExercise {
+  id               String     @id @default(uuid())
+  name             String
+  order            Int
+  workoutDayId     String
+  sets             Int
+  reps             Int
+  restTimInSeconds Int
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  workoutDay       WorkoutDay @relation(fields: [workoutDayId], references: [id])
 }
 
 enum WeekDay {
@@ -37,29 +111,4 @@ enum WeekDay {
   FRIDAY
   SATURDAY
   SUNDAY
-}
-
-model WorkoutDay {
-  id            String            @id @default(uuid())
-  name          String
-  workoutPlanId String
-  workoutPlan   WorkoutPlan       @relation(fields: [workoutPlanId], references: [id])
-  isRest        Boolean           @default(false)
-  weekDay       WeekDay
-  exercises     WorkoutExercise[]
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-}
-
-model WorkoutExercise {
-  id               String     @id @default(uuid())
-  name             String
-  order            Int
-  workoutDayId     String
-  workoutDay       WorkoutDay @relation(fields: [workoutDayId], references: [id])
-  sets             Int
-  reps             Int
-  restTimInSeconds Int
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
 }
