@@ -5,7 +5,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -79,15 +78,16 @@ model WorkoutPlan {
 }
 
 model WorkoutDay {
-  id            String            @id @default(uuid())
-  name          String
-  workoutPlanId String
-  isRest        Boolean           @default(false)
-  weekDay       WeekDay
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-  workoutPlan   WorkoutPlan       @relation(fields: [workoutPlanId], references: [id])
-  exercises     WorkoutExercise[]
+  id                       String            @id @default(uuid())
+  name                     String
+  workoutPlanId            String
+  isRest                   Boolean           @default(false)
+  weekDay                  WeekDay
+  createdAt                DateTime          @default(now())
+  updatedAt                DateTime          @updatedAt
+  workoutPlan              WorkoutPlan       @relation(fields: [workoutPlanId], references: [id])
+  exercises                WorkoutExercise[]
+  estimatedDurationSeconds Int
 }
 
 model WorkoutExercise {
@@ -97,7 +97,7 @@ model WorkoutExercise {
   workoutDayId     String
   sets             Int
   reps             Int
-  restTimInSeconds Int
+  restTimeInSeconds Int
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
   workoutDay       WorkoutDay @relation(fields: [workoutDayId], references: [id])
