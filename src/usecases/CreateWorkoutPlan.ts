@@ -22,7 +22,6 @@ export interface CreateWorkoutPlanDTO {
 }
 
 export class CreateWorkoutPlan {
-  // Usando a tipagem que criamos casando com a aula
   async execute(dto: CreateWorkoutPlanDTO) {
     // Busca se o usuário já possui algum plano de treino ativo
     const existingWorkoutPlan = await prisma.workoutPlan.findFirst({
@@ -32,7 +31,7 @@ export class CreateWorkoutPlan {
       },
     });
 
-    // Transação atômica idêntica à imagem
+    // Transação atômica
     return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       if (existingWorkoutPlan) {
         await tx.workoutPlan.update({
@@ -41,7 +40,6 @@ export class CreateWorkoutPlan {
         });
       }
 
-      // Linha 42: Gravação salva na constante 'workoutPlan'
       const workoutPlan = await tx.workoutPlan.create({
         data: {
           name: dto.name,
@@ -70,7 +68,6 @@ export class CreateWorkoutPlan {
         },
       });
 
-      // Linha 66: Busca profunda com 'include' exatamente igual à foto da aula
       const result = await tx.workoutPlan.findUnique({
         where: { id: workoutPlan.id },
         include: {
@@ -82,12 +79,12 @@ export class CreateWorkoutPlan {
         },
       });
 
-      // Linha 76: Validação de segurança se o registro falhar
+      // Validação de segurança se o registro falhar
       if (!result) {
         throw new Error("Workout plan not found");
       }
 
-      // Linha 79: Retorno do resultado completo populado
+      // Retorno do resultado completo populado
       return result;
     });
   }

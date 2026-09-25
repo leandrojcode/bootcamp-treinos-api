@@ -14,23 +14,17 @@ import { PrismaClient } from "../generated/prisma/index.js";
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 
-// 🌟 Passa o adaptador físico validando as exigências do motor do Prisma v7
+// Passa o adaptador físico validando as exigências do motor do Prisma v7
 const prisma = new PrismaClient({ adapter });
 
 export const auth = betterAuth({
-    trustedOrigins: ["http://localhost:3000"], 
-    
-    emailAndPassword: {
-        enable: true,
-    },
-    database: prismaAdapter(prisma, {
-        provider: "postgresql",
-    }),
-    plugins: [openAPI()],
+  trustedOrigins: ["http://localhost:3000"],
+
+  emailAndPassword: {
+    enable: true,
+  },
+  database: prismaAdapter(prisma, {
+    provider: "postgresql",
+  }),
+  plugins: [openAPI()],
 });
-
-
-
-
-
-
