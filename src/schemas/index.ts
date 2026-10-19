@@ -6,6 +6,23 @@ export const ErrorSchema = z.object({
   code: z.string(),
 });
 
+export const SignUpBodySchema = z.object({
+  name: z.string().trim().min(1),
+  email: z.email(),
+});
+
+export const SignUpResponseSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    email: z.string(),
+    emailVerified: z.boolean(),
+    image: z.string().nullable().optional(),
+    createdAt: z.coerce.date(),
+    updatedAt: z.coerce.date(),
+  })
+  .passthrough();
+
 // WorkoutPlanSchema com .passthrough() para aceitar os campos automáticos do Prisma v7
 export const WorkoutPlanSchema = z
   .object({
@@ -16,9 +33,10 @@ export const WorkoutPlanSchema = z
         .object({
           id: z.string().uuid().optional(),
           name: z.string().trim().min(1),
+          coverImageUrl: z.string().nullish(),
           weekDay: z.nativeEnum(WeekDay),
           isRest: z.boolean().default(false),
-          estimatedDurationInSeconds: z.number().min(1),
+          estimatedDurationSeconds: z.number().min(1),
           exercises: z
             .array(
               z

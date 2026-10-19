@@ -12,7 +12,7 @@ import {
 import { z } from "zod";
 
 import { auth } from "./lib/auth.js";
-// Importa o plugin de rotas que acabamos de criar
+import { authRoutes } from "./routes/auth.js";
 import { workoutPlanRoutes } from "./routes/workout-plan.js";
 
 const app = Fastify({
@@ -67,6 +67,9 @@ await app.register(fastifyApiReference as any, {
 
 // Registra as rotas de Planos de Treino centralizadas usando o app.register do Fastify
 await app.register(workoutPlanRoutes);
+
+// Registra as rotas de autenticação customizadas (antes do catch-all do Better Auth)
+await app.register(authRoutes);
 
 // Rota Inicial de Teste (Hello World)
 app.withTypeProvider<ZodTypeProvider>().route({

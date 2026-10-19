@@ -67,19 +67,20 @@ model Verification {
 }
 
 model WorkoutPlan {
-  id          String       @id @default(uuid())
-  name        String
-  userId      String
-  isActive    Boolean      @default(true)
-  createdAt   DateTime     @default(now()) @db.Timestamptz()
-  updatedAt   DateTime     @updatedAt @db.Timestamptz()
-  workoutDays WorkoutDay[]
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String       @id @default(uuid())
+  name          String
+  userId        String
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now()) @db.Timestamptz()
+  updatedAt     DateTime     @updatedAt @db.Timestamptz()
+  workoutDays   WorkoutDay[]
+  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model WorkoutDay {
   id                       String            @id @default(uuid())
   name                     String
+  coverImageUrl            String?
   workoutPlanId            String
   isRest                   Boolean           @default(false)
   weekDay                  WeekDay

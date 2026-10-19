@@ -1,14 +1,12 @@
-import Fastify, { FastifyInstance } from "fastify";
-import type { ZodTypeProvider } from "fastify-type-provider-zod";
-import { z } from "zod";
 import { fromNodeHeaders } from "better-auth/node";
+import { FastifyInstance } from "fastify";
+import type { ZodTypeProvider } from "fastify-type-provider-zod";
 
-import { ErrorSchema, WorkoutPlanSchema } from "../schemas/index.js";
-import { CreateWorkoutPlan } from "../usecases/CreateWorkoutPlan.js";
 import { NotFoundError } from "../errors/index.js";
 import { auth } from "../lib/auth.js";
+import { ErrorSchema, WorkoutPlanSchema } from "../schemas/index.js";
+import { CreateWorkoutPlan } from "../usecases/create-workout-plan.js";
 
-// As rotas no Fastify são exportadas como funções assíncronas que recebem a instância do app
 export const workoutPlanRoutes = async (app: FastifyInstance) => {
   app.withTypeProvider<ZodTypeProvider>().route({
     method: "POST",
@@ -16,7 +14,7 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
     schema: {
       body: WorkoutPlanSchema,
       response: {
-        201: z.any(),
+        201: WorkoutPlanSchema,
         400: ErrorSchema,
         401: ErrorSchema,
         404: ErrorSchema,
@@ -47,20 +45,28 @@ export const workoutPlanRoutes = async (app: FastifyInstance) => {
           });
         }
 
-        for (const day of workoutDays) {
-          if (!day.isRest && (!day.exercises || day.exercises.length === 0)) {
-            return reply.status(400).send({
-              error: `O dia "${day.name}" está ativo, portanto precisa ter pelo menos um exercício cadastrado.`,
-              code: "MISSING_EXERCISES",
-            });
-          }
+        const dayWithoutExercises = workoutDays.find(
+          (day) => !day.isRest && (!day.exercises || day.exercises.length === 0),
+        );
+        if (dayWithoutExercises) {
+          return reply.status(400).send({
+            error: `O dia "${dayWithoutExercises.name}" está ativo, portanto precisa ter pelo menos um exercício cadastrado.`,
+            code: "MISSING_EXERCISES",
+          });
         }
 
         const createWorkoutPlan = new CreateWorkoutPlan();
         const result = await createWorkoutPlan.execute({
           userId: session.user.id,
           name,
-          workoutDays,
+          workoutDays: workoutDays.map((workoutDay) => ({
+            name: workoutDay.name,
+            coverImageUrl: workoutDay.coverImageUrl,
+            weekDay: workoutDay.weekDay,
+            isRest: workoutDay.isRest,
+            estimatedDurationSeconds: workoutDay.estimatedDurationSeconds,
+            exercises: workoutDay.exercises,
+          })),
         });
 
         return reply.status(201).send(result);
