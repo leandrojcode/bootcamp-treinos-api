@@ -2,26 +2,26 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { openAPI } from "better-auth/plugins";
-
-// Drivers necessários para o Prisma v7
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
-
-// Importação do client principal
 import { PrismaClient } from "../generated/prisma/index.js";
 
-// Instancia uma piscina de conexões nativa do Node/Linux para o Postgres
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 
-// ADICIONADO O EXPORT AQUI: Agora outros arquivos podem importar o 'prisma'
 export const prisma = new PrismaClient({ adapter });
 
 export const auth = betterAuth({
-  trustedOrigins: ["http://localhost:3000"],
-
+  baseURL: process.env.BETTER_AUTH_URL,
+  trustedOrigins: ["http://localhost:3000", "http://localhost:3001"], // Garante acesso do front-end
+  socialProviders: {
+    google: {
+      clientId: process.env.GOOGLE_CLIENT_ID as string,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+    },
+  },
   emailAndPassword: {
-    enable: true,
+    enabled: true,
   },
   database: prismaAdapter(prisma, {
     provider: "postgresql",
