@@ -15,7 +15,9 @@ export class SignupUser {
     });
 
     if (existingUser) {
-      throw new ConflictError("Já existe um usuário cadastrado com este e-mail.");
+      throw new ConflictError(
+        "Já existe um usuário cadastrado com este e-mail.",
+      );
     }
 
     const now = new Date();

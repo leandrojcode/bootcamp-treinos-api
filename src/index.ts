@@ -13,7 +13,11 @@ import { z } from "zod";
 
 import { auth } from "./lib/auth.js";
 import { authRoutes } from "./routes/auth.js";
-import { workoutPlanRoutes } from "./routes/workout-plan.js";
+import { workoutPlanRoutes } from "./routes/WorkoutPlan.js";
+import { homeRoutes } from "./routes/home.js";
+import { statsRoutes } from "./routes/Stats.js";
+import { aiRoutes } from "./routes/ai.js";
+import { meRoutes } from "./routes/me.js";
 
 const app = Fastify({
   logger: true,
@@ -68,8 +72,20 @@ await app.register(fastifyApiReference as any, {
 // Registra as rotas de Planos de Treino centralizadas usando o app.register do Fastify
 await app.register(workoutPlanRoutes);
 
+// Registra as rotas da Home (Dashboard)
+await app.register(homeRoutes);
+
+// Registra as rotas de Estatísticas com o prefixo correto solicitado
+await app.register(statsRoutes, { prefix: "/stats" });
+
 // Registra as rotas de autenticação customizadas (antes do catch-all do Better Auth)
 await app.register(authRoutes);
+
+// Registra as rotas de IA
+await app.register(aiRoutes);
+
+// Registra as rotas de Me
+await app.register(meRoutes);
 
 // Rota Inicial de Teste (Hello World)
 app.withTypeProvider<ZodTypeProvider>().route({

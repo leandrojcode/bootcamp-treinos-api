@@ -11,3 +11,10 @@ export class ConflictError extends Error {
     this.name = "ConflictError";
   }
 }
+
+export class WorkoutPlanNotActiveError extends Error {
+  constructor(message = "O plano de treino informado nao esta ativo.") {
+    super(message);
+    this.name = "WorkoutPlanNotActiveError";
+  }
+}

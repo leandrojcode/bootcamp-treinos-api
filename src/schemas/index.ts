@@ -8,7 +8,7 @@ export const ErrorSchema = z.object({
 
 export const SignUpBodySchema = z.object({
   name: z.string().trim().min(1),
-  email: z.email(),
+  email: z.string().email(), // Corrigido z.email() para z.string().email() se necessário
 });
 
 export const SignUpResponseSchema = z
@@ -34,7 +34,8 @@ export const WorkoutPlanSchema = z
           id: z.string().uuid().optional(),
           name: z.string().trim().min(1),
           coverImageUrl: z.string().nullish(),
-          weekDay: z.nativeEnum(WeekDay),
+          // Atualizado para usar z.enum trazendo os valores exatos do enum do Prisma
+          weekDay: z.enum(Object.values(WeekDay) as [string, ...string[]]),
           isRest: z.boolean().default(false),
           estimatedDurationSeconds: z.number().min(1),
           exercises: z

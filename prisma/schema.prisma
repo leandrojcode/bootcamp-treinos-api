@@ -8,16 +8,20 @@ datasource db {
 }
 
 model User {
-  id            String        @id
-  name          String
-  email         String        @unique
-  emailVerified Boolean
-  image         String?
-  createdAt     DateTime
-  updatedAt     DateTime
-  workoutPlans  WorkoutPlan[]
-  accounts      Account[]
-  sessions      Session[]
+  id                  String        @id
+  name                String
+  email               String        @unique
+  emailVerified       Boolean
+  image               String?
+  createdAt           DateTime
+  updatedAt           DateTime
+  workoutPlans        WorkoutPlan[]
+  accounts            Account[]
+  sessions            Session[]
+  weightInGrams       Int?
+  heightInCentimeters Int?
+  age                 Int?
+  bodyFatPercentage   Int? // 100 representa 100%
 
   @@map("user")
 }
@@ -67,14 +71,14 @@ model Verification {
 }
 
 model WorkoutPlan {
-  id            String       @id @default(uuid())
-  name          String
-  userId        String
-  isActive      Boolean      @default(true)
-  createdAt     DateTime     @default(now()) @db.Timestamptz()
-  updatedAt     DateTime     @updatedAt @db.Timestamptz()
-  workoutDays   WorkoutDay[]
-  user          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String       @id @default(uuid())
+  name        String
+  userId      String
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now()) @db.Timestamptz()
+  updatedAt   DateTime     @updatedAt @db.Timestamptz()
+  workoutDays WorkoutDay[]
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model WorkoutDay {

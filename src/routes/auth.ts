@@ -1,8 +1,8 @@
 import { FastifyInstance } from "fastify";
 import type { ZodTypeProvider } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { SignupUser } from "../usecases/signup-user.js";
-import { SignInUser } from "../usecases/signin-user.js"; // Import do Use Case novo
+import { SignupUser } from "../usecases/SignUpUser.js";
+import { SignInUser } from "../usecases/SignInUser.js"; // Import do Use Case novo
 import { ErrorSchema } from "../schemas/index.js";
 import { ConflictError } from "../errors/index.js";
 import { NotFoundError } from "../errors/index.js";
@@ -42,12 +42,10 @@ export const authRoutes = async (app: FastifyInstance) => {
             .status(409)
             .send({ error: error.message, code: "CONFLICT_ERROR" });
         }
-        return reply
-          .status(500)
-          .send({
-            error: "Internal server error",
-            code: "INTERNAL_SERVER_ERROR",
-          });
+        return reply.status(500).send({
+          error: "Internal server error",
+          code: "INTERNAL_SERVER_ERROR",
+        });
       }
     },
   });
@@ -78,12 +76,10 @@ export const authRoutes = async (app: FastifyInstance) => {
             .status(404)
             .send({ error: error.message, code: "NOT_FOUND_ERROR" });
         }
-        return reply
-          .status(500)
-          .send({
-            error: "Internal server error",
-            code: "INTERNAL_SERVER_ERROR",
-          });
+        return reply.status(500).send({
+          error: "Internal server error",
+          code: "INTERNAL_SERVER_ERROR",
+        });
       }
     },
   });
