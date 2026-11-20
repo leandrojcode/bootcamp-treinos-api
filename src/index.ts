@@ -28,7 +28,11 @@ app.setSerializerCompiler(serializerCompiler);
 
 // Configuração do CORS para comunicação com o Frontend
 await app.register(fastifyCors, {
-  origin: ["http://localhost:3000", "http://localhost:3001"],
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:3002",
+  ],
   credentials: true,
 });
 
